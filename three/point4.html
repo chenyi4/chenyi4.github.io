@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>three.js webgl - cameras</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<!-- <link type="text/css" rel="stylesheet" href="main.css"> -->
+		<style>
+            body{
+                padding: 0px;
+                margin: 0px;
+                font-size: 0px;
+                width: 100%;
+                overflow: hidden;
+            }
+			a {
+				color: #08f;
+			}
+			b {
+				color: lightgreen;
+			}
+		</style>
+	</head>
+	<body>
+        <div id="info"></div>
+    </body>
+    <script type="module">
+        import * as THREE from './js/three.module.js';
+        var SCREEN_WIDTH = window.innerWidth;
+		var SCREEN_HEIGHT = window.innerHeight;
+		var aspect = SCREEN_WIDTH / SCREEN_HEIGHT;
+
+        var camera, scene, renderer;
+        var container = document.getElementById('info');
+        var pointLight,particles,mesh;
+
+        init();
+        function init() {
+            sceneInit();
+            cameraInit();
+            initPoint();
+            renderInit();
+            animate();
+        }
+
+        function sceneInit(){
+            scene = new THREE.Scene();
+        }
+
+        function initPoint(){
+            var material = new THREE.SpriteMaterial({
+                color: 0xffffff,
+                size: 1
+            });
+
+            var starsGeometry = new THREE.BoxGeometry(120, 130, 120, 10, 10, 10);
+            starsGeometry.vertices.forEach((el) => {
+                var vector = el.clone();
+                var sprite = new THREE.Sprite(material);
+                sprite.position.set(vector.x, vector.y, vector.z);
+                scene.add(sprite);
+            });
+        }
+
+        console.log(`
+            function initPoint(){
+                var material = new THREE.SpriteMaterial({
+                    color: 0xffffff,
+                    size: 1
+                });
+
+                var starsGeometry = new THREE.BoxGeometry(120, 130, 120, 10, 10, 10);
+
+                var bboxMesh = new THREE.Mesh(starsGeometry, new THREE.MeshBasicMaterial({
+                        color: "white",
+                        vertexColors: THREE.VertexColors,
+                        wireframeLinewidth: 1,
+                        wireframe: true,
+                        opacity: 0.2,
+                        transparent: true,
+                }));
+            
+                starsGeometry.vertices.forEach((el) => {
+                    var vector = el.clone();
+                    var sprite = new THREE.Sprite(material);
+                    sprite.position.set(vector.x, vector.y, vector.z);
+                    scene.add(sprite);
+                });
+            }
+        `);
+
+        function cameraInit(){
+            camera = new THREE.PerspectiveCamera( 50, SCREEN_WIDTH/SCREEN_HEIGHT, 1, 10000 );
+            camera.position.z = 360;
+            scene.add( camera );
+        }
+       
+
+        function renderInit(){
+            renderer = new THREE.WebGLRenderer( { antialias: true } );
+            renderer.setSize( SCREEN_WIDTH, SCREEN_HEIGHT );
+            renderer.render( scene, camera );
+            renderer.setClearColor(0x000000);
+            container.appendChild( renderer.domElement );
+        }
+
+        function animate() {
+            requestAnimationFrame( animate );
+            render();
+        }
+        
+        function render(){
+            renderer.clear();
+            renderer.render( scene, camera );
+        }
+
+    </script>
+</html>
