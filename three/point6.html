@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>three.js webgl - cameras</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<!-- <link type="text/css" rel="stylesheet" href="main.css"> -->
+		<style>
+            body{
+                padding: 0px;
+                margin: 0px;
+                font-size: 0px;
+                width: 100%;
+                overflow: hidden;
+            }
+			a {
+				color: #08f;
+			}
+			b {
+				color: lightgreen;
+			}
+		</style>
+	</head>
+	<body>
+        <div id="info"></div>
+    </body>
+    <script type="module">
+        import * as THREE from './js/three.module.js';
+        var SCREEN_WIDTH = window.innerWidth;
+		var SCREEN_HEIGHT = window.innerHeight;
+		var aspect = SCREEN_WIDTH / SCREEN_HEIGHT;
+
+        var camera, scene, renderer;
+        var container = document.getElementById('info');
+        var pointLight,particles,mesh;
+        var raycaster;
+        var mouse = new THREE.Vector2();
+        var INTERSECTED ;
+
+        init();
+        function init() {
+            sceneInit();
+            cameraInit();
+            initCube();
+            initLight();
+            renderInit();
+            animate();
+        }
+
+        function sceneInit(){
+            scene = new THREE.Scene();
+        }
+
+        function initLight(){
+            var light = new THREE.DirectionalLight( 0xffffff, 1 );
+            light.position.set( 1, 1, 1 ).normalize();
+            scene.add( light );
+        }
+        var starsGeometry;
+        function initCube(){
+            starsGeometry = new THREE.BoxGeometry(20, 30, 120, 20, 20, 20);
+
+            var bboxMesh = new THREE.Mesh(starsGeometry, new THREE.MeshLambertMaterial({
+                    color: Math.random() * 0xffffff,
+            }));
+
+            scene.add( bboxMesh );
+
+            var starsGeometry2 = new THREE.BoxGeometry(20, 30, 120, 20, 20, 20);
+
+            var bboxMesh2 = new THREE.Mesh(starsGeometry2, new THREE.MeshLambertMaterial({
+                color: Math.random() * 0xffffff
+            }));
+            bboxMesh2.position.x = -30;
+            scene.add( bboxMesh2 );
+
+            var starsGeometry3 = new THREE.BoxGeometry(20, 30, 120, 20, 20, 20);
+
+            var bboxMesh3 = new THREE.Mesh(starsGeometry2, new THREE.MeshLambertMaterial({
+                color: Math.random() * 0xffffff
+            }));
+            bboxMesh3.position.x = 30;
+            scene.add( bboxMesh3 );
+        }
+
+
+        function cameraInit(){
+            camera = new THREE.PerspectiveCamera( 70, SCREEN_WIDTH/SCREEN_HEIGHT, 1, 10000 );
+            camera.position.z = 200;
+        }
+       
+
+        function renderInit(){
+            raycaster = new THREE.Raycaster();
+            renderer = new THREE.WebGLRenderer( { antialias: true } );
+            renderer.setSize( SCREEN_WIDTH, SCREEN_HEIGHT );
+            renderer.render( scene, camera );
+            renderer.setClearColor(0x000000);
+            container.appendChild( renderer.domElement );
+            document.addEventListener('mousemove', onDocumentMouseMove, false);
+        }
+
+        function animate() {
+            requestAnimationFrame( animate );
+            render();
+        }
+        
+        function raycasterSet(){
+            raycaster.setFromCamera( mouse, camera );
+            var intersects = raycaster.intersectObjects( scene.children );
+            
+            if ( intersects.length > 0 ) {
+                if ( INTERSECTED != intersects[ 0 ].object ) {
+
+                    if ( INTERSECTED ) INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
+
+                    INTERSECTED = intersects[ 0 ].object;
+                    INTERSECTED.currentHex = INTERSECTED.material.emissive.getHex();
+                    INTERSECTED.material.emissive.setHex( 0xff0000 );
+
+                }
+
+            } else {
+
+                if ( INTERSECTED ) INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
+
+                INTERSECTED = null;
+
+            }
+        }
+
+        function onDocumentMouseMove( event ) {
+            event.preventDefault();
+
+            mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+            mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+        }
+
+
+        function render(){
+            raycasterSet();
+            // renderer.clear();
+            renderer.render( scene, camera );
+           
+        }
+
+    </script>
+</html>

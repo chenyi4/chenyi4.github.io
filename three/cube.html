@@ -33,6 +33,7 @@
         var camera, scene, renderer;
         var container = document.getElementById('info');
         var pointLight,particles,mesh;
+        var mouse = new THREE.Vector2();
 
         init();
         function init() {
@@ -100,8 +101,11 @@
             requestAnimationFrame( animate );
             render();
         }
+
         
+
         function render(){
+            raycasterSet();
             renderer.clear();
             renderer.render( scene, camera );
         }
