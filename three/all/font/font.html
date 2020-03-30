@@ -65,13 +65,13 @@
         function initText(){
             var text = new THREE.FontLoader().load('./../../font/type.json', function(font) {
                 allFont = font;
-                addFont();
             });
         }
 
         var i = 0;
         var meshs = [];
-        function addFont(){
+        var Arr = ['c','h','e','n','y','i'];
+        function addFont(value){
             var color = 0x006699;
             var matLite = new THREE.MeshBasicMaterial( {
                 color: color,
@@ -79,12 +79,12 @@
                 opacity: 1,
                 side: THREE.DoubleSide
             });
-            var message = "A";
+            var message = Arr[value>5?value-5:value];
             var shapes = allFont.generateShapes( message, 100 );
             var geometry = new THREE.ShapeBufferGeometry( shapes );
             mesh = new THREE.Mesh( geometry, matLite );
             mesh.position.z = - 450 ;
-            mesh.position.x = - 1440 + i * 100;
+            mesh.position.x = - 540 + value *80;
             mesh.position.y = 400;
             meshs.push(mesh);
             scene.add( mesh );
@@ -134,8 +134,8 @@
         }
         
         function render(){
-            i = i + 1;
             if(allFont){
+                i = i + 1;
                 meshs.forEach((mesh, n)=>{
                     mesh.position.y = mesh.position.y - (1/2*n);
                     if(mesh.position.y < -300){
@@ -143,7 +143,7 @@
                     }
                 })
                 if(meshs.length < 10){
-                    addFont();
+                    addFont(i);
                 }
                 // meshs[0].position.y = meshs[0].position.y - 1;
             }
