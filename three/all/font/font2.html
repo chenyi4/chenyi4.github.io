@@ -59,7 +59,7 @@
         function sceneInit(){
             scene = new THREE.Scene();
         }
-        
+
         var mesh;
         var allFont;
         function initText(){
@@ -71,6 +71,7 @@
         var i = 0;
         var meshs = [];
         var Arr = ['c','h','e','n','y','i'];
+        var len = Arr.length;
         function addFont(value){
             var color = 0x006699;
             var matLite = new THREE.MeshBasicMaterial( {
@@ -80,7 +81,7 @@
                 side: THREE.DoubleSide
             });
             var value = value + 1;
-            var nVal = value>6?(value - (Math.floor(value/6)*6)):value-1;
+            var nVal = value>len?(value - (Math.floor(value/len)*len)):value-1;
             var message = Arr[nVal];
             var shapes = allFont.generateShapes( message, 100*Math.random()+10);
             var geometry = new THREE.ShapeBufferGeometry( shapes );
