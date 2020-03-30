@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>three.js webgl - cameras</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<!-- <link type="text/css" rel="stylesheet" href="main.css"> -->
+		<style>
+            body{
+                padding: 0px;
+                margin: 0px;
+                font-size: 0px;
+            }
+			a {
+				color: #08f;
+			}
+			b {
+				color: lightgreen;
+			}
+            .show{
+                width: 50%;
+                height: 40%;
+                background: rgba(255,255,255,0.8);
+                color: black;
+                margin:  0 auto;
+                position: absolute;
+                top: 10%;
+                left: 5%;
+                font-size: 14px;
+            }
+		</style>
+	</head>
+	<body>
+        <div id="info"></div>
+    </body>
+    <script type="module">
+
+        import * as THREE from './../../js/three.module.js';
+
+        import Stats from './../../js/stats.module.js';
+
+        var SCREEN_WIDTH = window.innerWidth;
+		var SCREEN_HEIGHT = window.innerHeight;
+		var aspect = SCREEN_WIDTH / SCREEN_HEIGHT;
+
+        var camera, scene, renderer;
+        var container = document.getElementById('info');
+        var pointLight,particles,mesh;
+
+        init();
+        function init() {
+            sceneInit();
+            cameraInit();
+            initText();
+            renderInit();
+            animate();
+        }
+
+        function sceneInit(){
+            scene = new THREE.Scene();
+        }
+
+        var mesh;
+        var allFont;
+        function initText(){
+            var text = new THREE.FontLoader().load('./../../font/type.json', function(font) {
+                allFont = font;
+                addFont();
+            });
+        }
+
+        var i = 0;
+        var meshs = [];
+        function addFont(){
+            var color = 0x006699;
+            var matLite = new THREE.MeshBasicMaterial( {
+                color: color,
+                transparent: true,
+                opacity: 1,
+                side: THREE.DoubleSide
+            });
+            var message = "A";
+            var shapes = allFont.generateShapes( message, 100 );
+            var geometry = new THREE.ShapeBufferGeometry( shapes );
+            mesh = new THREE.Mesh( geometry, matLite );
+            mesh.position.z = - 450 ;
+            mesh.position.x = - 1440 + i * 100;
+            mesh.position.y = 400;
+            meshs.push(mesh);
+            scene.add( mesh );
+        }
+
+        console.log(`
+            function initText(){
+                var text = new THREE.FontLoader().load('./../../font/type.json', function(font) {
+                    allFont = font;
+                    var color = 0x006699;
+                    var matLite = new THREE.MeshBasicMaterial( {
+                        color: color,
+                        transparent: true,
+                        opacity: 1,
+                        side: THREE.DoubleSide
+                    });
+                    var message = " ABCDJSH";
+                    var shapes = font.generateShapes( message, 100 );
+                    var geometry = new THREE.ShapeBufferGeometry( shapes );
+                    mesh = new THREE.Mesh( geometry, matLite );
+                    mesh.position.z = - 450;
+                    mesh.position.x = - 320;
+                    scene.add( mesh );
+                });
+            }
+        `);
+
+        function cameraInit(){
+            camera = new THREE.PerspectiveCamera( 50, SCREEN_WIDTH/SCREEN_HEIGHT, 1, 10000 );
+            camera.position.z = 300;
+            scene.add( camera );
+        }
+       
+
+        function renderInit(){
+            renderer = new THREE.WebGLRenderer( { antialias: true } );
+            renderer.setSize( SCREEN_WIDTH, SCREEN_HEIGHT );
+            renderer.render( scene, camera );
+            renderer.setClearColor(0xffffff);
+            // renderer.clear();
+            container.appendChild( renderer.domElement );
+        }
+
+        function animate() {
+            requestAnimationFrame( animate );
+            render();
+        }
+        
+        function render(){
+            i = i + 1;
+            if(allFont){
+                meshs.forEach((mesh, n)=>{
+                    mesh.position.y = mesh.position.y - (1/2*n);
+                    if(mesh.position.y < -300){
+                        mesh.position.y = 200;
+                    }
+                })
+                if(meshs.length < 10){
+                    addFont();
+                }
+                // meshs[0].position.y = meshs[0].position.y - 1;
+            }
+            
+            renderer.clear();
+            renderer.render( scene, camera );
+        }
+
+    </script>
+</html>
