@@ -68,7 +68,7 @@
       
         function addSmoke(){
             var smokeTexture = THREE.ImageUtils.loadTexture('./Smoke-Element.png');
-            var smokeMaterial = new THREE.MeshLambertMaterial({color: 0x00dddd, map: smokeTexture, transparent: true});
+            var smokeMaterial = new THREE.MeshLambertMaterial({color: 0xffffff, map: smokeTexture, transparent: true});
             var smokeGeo = new THREE.PlaneGeometry(300,300);
             for (var p = 0; p < 150; p++) {
                 var particle = new THREE.Mesh(smokeGeo,smokeMaterial);
@@ -107,7 +107,7 @@
             renderer = new THREE.WebGLRenderer( { antialias: true } );
             renderer.setSize( SCREEN_WIDTH, SCREEN_HEIGHT );
             renderer.render( scene, camera );
-            renderer.setClearColor(0x000000);
+            renderer.setClearColor(0xff0000);
             // renderer.clear();
             container.appendChild( renderer.domElement );
         }

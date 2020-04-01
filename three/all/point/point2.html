@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>three.js webgl - cameras</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<!-- <link type="text/css" rel="stylesheet" href="main.css"> -->
+		<style>
+            body{
+                padding: 0px;
+                margin: 0px;
+                font-size: 0px;
+            }
+			a {
+				color: #08f;
+			}
+			b {
+				color: lightgreen;
+			}
+            .show{
+                width: 50%;
+                height: 40%;
+                background: rgba(255,255,255,0.8);
+                color: black;
+                margin:  0 auto;
+                position: absolute;
+                top: 10%;
+                left: 5%;
+                font-size: 14px;
+            }
+		</style>
+	</head>
+	<body>
+        <!-- https://moments.epic.net/ -->
+        <div id="info"></div>
+    </body>
+    <script type="module">
+        import * as THREE from './../../js/three.module.js';
+        import Stats from './../../js/stats.module.js';
+
+        var SCREEN_WIDTH = window.innerWidth;
+		var SCREEN_HEIGHT = window.innerHeight;
+		var aspect = SCREEN_WIDTH / SCREEN_HEIGHT;
+
+        var camera, scene, renderer;
+        var container = document.getElementById('info');
+        var pointLight,particles,mesh;
+
+        var clock = new THREE.Clock();
+        var smokeParticles = [];
+        var askName = 'sddd';
+
+        init();
+        function init() {
+            sceneInit();
+            cameraInit();
+            addSmoke();
+            lightInit();
+            renderInit();
+            animate();
+        }
+
+        function sceneInit(){
+            scene = new THREE.Scene();
+        }
+
+
+      
+        function addSmoke(){
+            var smokeTexture = THREE.ImageUtils.loadTexture('./blue-smoke.png');
+            var smokeMaterial = new THREE.MeshLambertMaterial({color: 0xffffff, map: smokeTexture, transparent: true});
+            var smokeGeo = new THREE.PlaneGeometry(300,300);
+            for (var p = 0; p < 150; p++) {
+                var particle = new THREE.Mesh(smokeGeo,smokeMaterial);
+                particle.position.set(Math.random()*500-250,Math.random()*500-250,Math.random()*1000-100);
+                particle.rotation.z = Math.random() * 360;
+                scene.add(particle);
+                smokeParticles.push(particle);
+            }
+        }
+        
+        function evolveSmoke() {
+            var delta = clock.getDelta();
+            var sp = smokeParticles.length;
+            while(sp--) {
+                smokeParticles[sp].rotation.z += (delta * 0.2);
+            }
+        }
+
+        function lightInit(){
+            var light = new THREE.DirectionalLight(0xffffff,0.5);
+            light.position.set(-1,0,1);
+            scene.add(light);
+        }
+
+        console.log(`
+           
+        `);
+
+        function cameraInit(){
+            camera = new THREE.PerspectiveCamera( 50, SCREEN_WIDTH/SCREEN_HEIGHT, 1, 10000 );
+            camera.position.z = 300;
+            scene.add( camera );
+        }
+       
+        function renderInit(){
+            renderer = new THREE.WebGLRenderer( { antialias: true } );
+            renderer.setSize( SCREEN_WIDTH, SCREEN_HEIGHT );
+            renderer.render( scene, camera );
+            renderer.setClearColor(0x00547f);
+            // renderer.clear();
+            container.appendChild( renderer.domElement );
+        }
+
+        
+        function animate() {
+            evolveSmoke();
+            requestAnimationFrame( animate );
+            render();
+        }
+        
+        function render(){
+            renderer.render( scene, camera );
+        }
+
+    </script>
+</html>
