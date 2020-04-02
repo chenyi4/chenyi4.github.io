@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>three.js webgl - cameras</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<!-- <link type="text/css" rel="stylesheet" href="main.css"> -->
+		<style>
+            body{
+                padding: 0px;
+                margin: 0px;
+                font-size: 0px;
+            }
+			a {
+				color: #08f;
+			}
+			b {
+				color: lightgreen;
+			}
+            .show{
+                width: 50%;
+                height: 40%;
+                background: rgba(255,255,255,0.8);
+                color: black;
+                margin:  0 auto;
+                position: absolute;
+                top: 10%;
+                left: 5%;
+                font-size: 14px;
+            }
+            .face{
+                font-size: 20px;
+                width: 200px;
+                height: 200px;
+                position: absolute;
+                left: 0px;
+                top: 0px;
+                padding: 30px;
+                color: white;
+            }
+		</style>
+	</head>
+	<body>
+        <!-- https://moments.epic.net/ -->
+        <div id="info"></div>
+        <div class="face">圆柱体</div>
+    </body>
+    <script type="module">
+        import * as THREE from './../../js/three.module.js';
+        import Stats from './../../js/stats.module.js';
+
+        var SCREEN_WIDTH = window.innerWidth;
+		var SCREEN_HEIGHT = window.innerHeight;
+		var aspect = SCREEN_WIDTH / SCREEN_HEIGHT;
+
+        var camera, scene, renderer;
+        var container = document.getElementById('info');
+        var pointLight,particles,mesh;
+
+        var clock = new THREE.Clock();
+        var smokeParticles = [];
+        
+
+        init();
+        function init() {
+            sceneInit();
+            cameraInit();
+            initGeometry();
+            lightInit();
+            renderInit();
+            animate();
+        }
+
+        function sceneInit(){
+            scene = new THREE.Scene();
+        }
+      
+        function initGeometry(){
+            var geometry = new THREE.CylinderGeometry( 15, 15, 32, 4 );
+            var material = new THREE.MeshBasicMaterial({color: 0xffff00});
+            var cone = new THREE.Mesh( geometry, material );
+            cone.rotation.x = 0.5;
+            scene.add( cone );
+
+            var geometry2 = new THREE.CylinderGeometry( 15, 15, 32, 5 );
+            var cone2 = new THREE.Mesh( geometry2, material );
+            cone2.rotation.x = Math.PI/2;
+            cone2.position.x = 65;
+            scene.add( cone2 );
+            
+            var geometry3 = new THREE.CylinderGeometry( 15, 15, 32, 25 );
+            var cone3 = new THREE.Mesh( geometry3, material );
+            cone3.rotation.x = Math.PI/4;
+            cone3.position.x = -65;
+            scene.add( cone3 );
+
+            var geometry4 = new THREE.CylinderGeometry( 15, 15, 32, 3 );
+            var cone4 = new THREE.Mesh( geometry4, material );
+            cone4.rotation.x = Math.PI/4;
+            cone4.position.x = -125;
+            scene.add( cone4 );
+
+            var geometry5 = new THREE.CylinderGeometry( 15, 20, 15, 3 ); //第三个参数是高度，第一个参数是上边的宽度，下边的参数是下边的宽度，3是边的数量
+            var cone5 = new THREE.Mesh( geometry5, material );
+            cone5.rotation.x = 0;
+            cone5.position.x = 125;
+            scene.add(cone5);
+        }
+        
+        function lightInit(){
+            var light = new THREE.DirectionalLight(0xffffff,0.5);
+            light.position.set(-1,0,1);
+            scene.add(light);
+        }
+
+        console.log(`
+           
+        `);
+
+        var AMOUNT = 6;
+        function cameraInit(){
+            camera = new THREE.PerspectiveCamera( 50, SCREEN_WIDTH/SCREEN_HEIGHT, 1, 10000 );
+            camera.position.z = 300;
+            scene.add( camera );
+        }
+       
+        function renderInit(){
+            renderer = new THREE.WebGLRenderer( { antialias: true } );
+            renderer.setPixelRatio( window.devicePixelRatio );
+            renderer.setSize( SCREEN_WIDTH, SCREEN_HEIGHT );
+            renderer.render( scene, camera );
+            renderer.shadowMap.enabled = true;
+            renderer.setClearColor(0xe6bdbd);
+            // renderer.clear();
+            container.appendChild( renderer.domElement );
+        }
+
+        
+        function animate() {
+            requestAnimationFrame( animate );
+            render();
+        }
+        
+        function render(){
+            renderer.render( scene, camera );
+        }
+
+    </script>
+</html>
