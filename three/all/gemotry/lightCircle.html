@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>three.js webgl - cameras</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<!-- <link type="text/css" rel="stylesheet" href="main.css"> -->
+		<style>
+            body{
+                padding: 0px;
+                margin: 0px;
+                font-size: 0px;
+            }
+			a {
+				color: #08f;
+			}
+			b {
+				color: lightgreen;
+			}
+            .show{
+                width: 50%;
+                height: 40%;
+                background: rgba(255,255,255,0.8);
+                color: black;
+                margin:  0 auto;
+                position: absolute;
+                top: 10%;
+                left: 5%;
+                font-size: 14px;
+            }
+            .face{
+                font-size: 20px;
+                width: 200px;
+                height: 200px;
+                position: absolute;
+                left: 0px;
+                top: 0px;
+                padding: 30px;
+                color: white;
+            }
+		</style>
+	</head>
+	<body>
+        <!-- https://moments.epic.net/ -->
+        <div id="info"></div>
+        <div class="face">发光的圆形</div>
+    </body>
+    <script type="module">
+        import * as THREE from './../../js/three.module.js';
+        import Stats from './../../js/stats.module.js';
+
+        var SCREEN_WIDTH = window.innerWidth;
+		var SCREEN_HEIGHT = window.innerHeight;
+		var aspect = SCREEN_WIDTH / SCREEN_HEIGHT;
+
+        var camera, scene, renderer;
+        var container = document.getElementById('info');
+        var pointLight,particles,mesh;
+
+        var clock = new THREE.Clock();
+        var smokeParticles = [];
+        
+
+        init();
+        function init() {
+            sceneInit();
+            cameraInit();
+            initGeometry();
+            lightInit();
+            renderInit();
+            animate();
+        }
+
+        function sceneInit(){
+            scene = new THREE.Scene();
+        }
+      
+        function initGeometry(){
+            var geometry = new THREE.ConeGeometry( 15, 30, 32 );
+            var material = new THREE.MeshLambertMaterial({color: 0xffff00});
+            var cone = new THREE.Mesh( geometry, material );
+            cone.rotation.x = 0.5;
+            scene.add( cone );
+        }
+        
+        function lightInit(){
+            var pointLight = new THREE.PointLight( 0xffffff, 1,1300, 1 );
+            var bulbGeometry = new THREE.SphereBufferGeometry( 2, 16, 8 );
+            var bulbMat = new THREE.MeshBasicMaterial({
+                color: 0xffffff
+            });
+            pointLight.position.set( 0, 30, 120 );
+            pointLight.add(new THREE.Mesh( bulbGeometry, bulbMat));
+            scene.add( pointLight );
+        }
+
+        console.log(`
+           
+        `);
+
+        var AMOUNT = 6;
+        function cameraInit(){
+            camera = new THREE.PerspectiveCamera( 50, SCREEN_WIDTH/SCREEN_HEIGHT, 1, 10000 );
+            camera.position.z = 300;
+            scene.add( camera );
+        }
+       
+        function renderInit(){
+            renderer = new THREE.WebGLRenderer( { antialias: true } );
+            renderer.setPixelRatio( window.devicePixelRatio );
+            renderer.setSize( SCREEN_WIDTH, SCREEN_HEIGHT );
+            renderer.render( scene, camera );
+            renderer.shadowMap.enabled = true;
+            renderer.setClearColor(0xe6bdbd);
+            // renderer.clear();
+            container.appendChild( renderer.domElement );
+        }
+
+        
+        function animate() {
+            requestAnimationFrame( animate );
+            render();
+        }
+        
+        function render(){
+            renderer.render( scene, camera );
+        }
+
+    </script>
+</html>
