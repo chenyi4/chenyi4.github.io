@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>three.js webgl - cameras</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<!-- <link type="text/css" rel="stylesheet" href="main.css"> -->
+		<style>
+            body{
+                padding: 0px;
+                margin: 0px;
+                font-size: 0px;
+            }
+			a {
+				color: #08f;
+			}
+			b {
+				color: lightgreen;
+			}
+            .show{
+                width: 50%;
+                height: 40%;
+                background: rgba(255,255,255,0.8);
+                color: black;
+                margin:  0 auto;
+                position: absolute;
+                top: 10%;
+                left: 5%;
+                font-size: 14px;
+            }
+            .face{
+                font-size: 20px;
+                width: 200px;
+                height: 200px;
+                position: absolute;
+                left: 0px;
+                top: 0px;
+                padding: 30px;
+                color: white;
+            }
+		</style>
+	</head>
+	<body>
+        <!-- https://moments.epic.net/ -->
+        <div id="info"></div>
+        <div class="face">天空</div>
+    </body>
+    <script id="vs" type="x-shader/x-vertex">
+        varying vec2 vUv;
+        void main() {
+            vUv = uv;
+            gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+        }
+    </script>
+    <script id="fs" type="x-shader/x-fragment">
+        uniform sampler2D map;
+        uniform vec3 fogColor;
+        uniform float fogNear;
+        uniform float fogFar;
+        varying vec2 vUv;
+    
+        void main() {
+            float depth = gl_FragCoord.z / gl_FragCoord.w;
+            float fogFactor = smoothstep( fogNear, fogFar, depth );
+            gl_FragColor = texture2D( map, vUv );
+            gl_FragColor.w *= pow( gl_FragCoord.z, 20.0 );
+            gl_FragColor = mix( gl_FragColor, vec4( fogColor, gl_FragColor.w ), fogFactor );
+        }
+    </script>
+    <script type="module">
+        import * as THREE from './../../js/three.module.js';
+        import Stats from './../../js/stats.module.js';
+        import { OrbitControls } from './../../js/OrbitControls.js';
+
+        var SCREEN_WIDTH = window.innerWidth;
+		var SCREEN_HEIGHT = window.innerHeight;
+		var aspect = SCREEN_WIDTH / SCREEN_HEIGHT;
+
+        var camera, scene, renderer;
+        var container = document.getElementById('info');
+        var pointLight,particles,mesh;
+
+        var windowHalfX = window.innerWidth / 2;
+        var windowHalfY = window.innerHeight / 2;
+
+        var clock = new THREE.Clock();
+        var smokeParticles = [];
+        var start_time = Date.now();
+        var controls;
+        var mouseX = 0,mouseY = 0;
+       
+        init();
+        function init() {
+            sceneInit();
+            cameraInit();
+            initGeometry();
+            lightInit();
+            renderInit();
+            animate();
+            document.addEventListener( 'mousemove', onDocumentMouseMove, false );
+        }
+
+        function sceneInit(){
+            scene = new THREE.Scene();
+        }
+        
+        var geometry;
+        function initGeometry(){
+            geometry = new THREE.Geometry();
+
+            var texture = new THREE.TextureLoader().load( './cloud/cloud.png', animate );
+            texture.magFilter = THREE.LinearMipMapLinearFilter;
+            texture.minFilter = THREE.LinearMipMapLinearFilter;
+            
+            var fog = new THREE.Fog( 0x4584b4, - 100, 3000 );
+
+            var material = new THREE.ShaderMaterial( {
+                uniforms: {
+
+                    "map": { type: "t", value: texture },
+                    "fogColor" : { type: "c", value: fog.color },
+                    "fogNear" : { type: "f", value: fog.near },
+                    "fogFar" : { type: "f", value: fog.far },
+
+                },
+                vertexShader: document.getElementById( 'vs' ).textContent,
+                fragmentShader: document.getElementById( 'fs' ).textContent,
+                depthWrite: false,
+                depthTest: false,
+                transparent: true
+            });
+
+            var plane = new THREE.Mesh( new THREE.PlaneGeometry( 64, 64 ) );
+
+            for ( var i = 0; i < 8000; i++ ) {
+
+                plane.position.x = Math.random() * 1000 - 500;
+                plane.position.y = - Math.random() * Math.random() * 200 - 15;
+                plane.position.z = i;
+                plane.rotation.z = Math.random() * Math.PI;
+                plane.scale.x = plane.scale.y = Math.random() * Math.random() * 1.5 + 0.5;
+
+                plane.updateMatrix();
+
+                geometry.merge(plane.geometry, plane.matrix);
+
+            }
+            var mesh = new THREE.Mesh( geometry, material );
+            scene.add( mesh );
+            mesh = new THREE.Mesh( geometry, material );
+            mesh.position.z = - 8000;
+            scene.add( mesh );
+        }
+
+        function lightInit(){
+            var light = new THREE.DirectionalLight(0xffffff,0.5);
+            light.position.set(-1,0,1);
+            scene.add(light);
+        }
+
+
+        function onDocumentMouseMove( event ) {
+
+            mouseX = ( event.clientX - windowHalfX ) * 0.25;
+            mouseY = ( event.clientY - windowHalfY ) * 0.15;
+
+        }
+        console.log(`
+           
+        `);
+
+        var AMOUNT = 6;
+        function cameraInit(){
+            camera = new THREE.PerspectiveCamera( 30, window.innerWidth / window.innerHeight, 1, 3000 );
+            camera.position.z = 6000;
+        }
+       
+        function renderInit(){
+            renderer = new THREE.WebGLRenderer( { antialias: true } );
+            renderer.setPixelRatio( window.devicePixelRatio );
+            renderer.setSize( SCREEN_WIDTH, SCREEN_HEIGHT );
+            renderer.render( scene, camera );
+            renderer.shadowMap.enabled = true;
+            renderer.setClearColor(0xe6bdbd);
+            // renderer.clear();
+            container.appendChild( renderer.domElement );
+        }
+
+        
+        function initControls() {
+
+            controls = new OrbitControls(camera, renderer.domElement);
+            //设置控制器的中心点
+            //controls.target.set( 0, 5, 0 );
+            // 如果使用animate方法时，将此函数删除
+            //controls.addEventListener( 'change', render );
+            // 使动画循环使用时阻尼或自转 意思是否有惯性
+            controls.enableDamping = true;
+            //动态阻尼系数 就是鼠标拖拽旋转灵敏度
+            //controls.dampingFactor = 0.25;
+            //是否可以缩放
+            controls.enableZoom = true;
+            //是否自动旋转
+            controls.autoRotate = false;
+            controls.autoRotateSpeed = 0.5;
+            //设置相机距离原点的最远距离
+            controls.minDistance = 1;
+            //设置相机距离原点的最远距离
+            controls.maxDistance = 2000;
+            //是否开启右键拖拽
+            controls.enablePan = true;
+        }
+        var position;
+        function animate() {
+            requestAnimationFrame( animate );
+
+            position = ( ( Date.now() - start_time ) * 0.03 ) % 8000;
+
+            camera.position.x += ( mouseX - camera.position.x ) * 0.1;
+            camera.position.y += ( - mouseY - camera.position.y ) * 0.1;
+            camera.position.z = - position + 8000;
+            render();
+        }
+        
+        function render(){
+            renderer.render( scene, camera );
+        }
+
+    </script>
+</html>
