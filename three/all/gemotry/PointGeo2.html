@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>three.js webgl - cameras</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<!-- <link type="text/css" rel="stylesheet" href="main.css"> -->
+		<style>
+            body{
+                padding: 0px;
+                margin: 0px;
+                font-size: 0px;
+            }
+			a {
+				color: #08f;
+			}
+			b {
+				color: lightgreen;
+			}
+            .show{
+                width: 300px;
+                height: 40;
+                background: rgba(255,255,255,0.8);
+                color: black;
+                margin:  0 auto;
+                position: absolute;
+                top: 10%;
+                left: 5%;
+                font-size: 14px;
+            }
+		</style>
+	</head>
+	<body>
+        <!-- https://moments.epic.net/ -->
+        <div id="info"></div>
+        <div class="show">给几何体的顶点添加几何体</div>
+    </body>
+    <script type="module">
+        import * as THREE from './../../js/three.module.js';
+        import Stats from './../../js/stats.module.js';
+        import { ConvexBufferGeometry } from './../../js/ConvexGeometry.js';
+
+        var SCREEN_WIDTH = window.innerWidth;
+		var SCREEN_HEIGHT = window.innerHeight;
+		var aspect = SCREEN_WIDTH / SCREEN_HEIGHT;
+
+        var camera, scene, renderer;
+        var container = document.getElementById('info');
+        var pointLight,particles,mesh;
+
+        var clock = new THREE.Clock();
+        var smokeParticles = [];
+        var cube,group;
+
+        var colors = [ 0xBA1200, 0x031927, 0x629677, 0x629677, 0x40476D, 0xAD5D4E,0xFAF3DD, 0x629677, 0xEB6534,
+            0x08605F, 0x40476D, 0x177E89, 0x629677, 0x306BAC, 0x6F9CEB, 0xC6C7C4, 0xC2E812, 0x91F5AD, 0xD34E24
+        ];
+
+        init();
+        function init() {
+            sceneInit();
+            cameraInit();
+            initGeometry();
+            lightInit();
+            renderInit();
+            animate();
+        }
+
+        function sceneInit(){
+            scene = new THREE.Scene();
+        }
+      
+        function initGeometry(){
+            group = new THREE.Group();
+            var vertices = new THREE.DodecahedronGeometry( 52 ).vertices;
+
+            var loader = new THREE.TextureLoader();
+            var texture = loader.load( './../material/pic/disc.png' );
+            var pointsMaterial = new THREE.PointsMaterial({
+                color: 0xa4a4d4,
+                size: 8,
+                map: texture,
+                alphaTest: 0.5
+            });
+
+            var vertices2 = new THREE.DodecahedronGeometry( 58 ).vertices;
+            // =========================================
+            // =========================================
+            //渲染顶点
+            for(var i = 0; i < vertices.length; i++){
+                var pointSet = vertices[i];
+                var light = vertices2[i];
+                setPointCube(pointSet.x, pointSet.y, pointSet.z, i);
+                setPointLight(light.x, light.y, light.z, i);
+            }
+
+            var pointsGeometry = new THREE.BufferGeometry().setFromPoints( vertices );
+            var points = new THREE.Points( pointsGeometry, pointsMaterial );
+
+            // =========================================
+            // =========================================
+            //用顶点来渲染面 
+
+            var meshMaterial = new THREE.MeshLambertMaterial( {
+				color: 0xffffff,
+            });
+            var meshGeometry = new THREE.DodecahedronGeometry( 52 );
+            var mesh = new THREE.Mesh( meshGeometry, meshMaterial );
+            
+            group.add( mesh);
+            group.add( points);
+            scene.add(group);
+        }
+        
+        
+        function setPointCube(x, y, z, i){
+            var big = 5 * Math.random() + 1;
+            var geometry = new THREE.SphereGeometry(big, 32, 32 );
+            var material = new THREE.MeshBasicMaterial( {color: colors[i]} );
+            var mesh = new THREE.Mesh( geometry, material);
+            mesh.position.x = x;
+            mesh.position.y = y;
+            mesh.position.z = z;
+            group.add( mesh );
+        }
+
+        function lightInit(){
+            // var ambient = new THREE.AmbientLight( 0xffffff, 0.1 );
+            // scene.add( ambient );
+        }
+
+        function setPointLight(x, y, z, i){
+            var pointLight = new THREE.PointLight( colors[i], 1,22, 0.3 );
+            var bulbGeometry = new THREE.SphereBufferGeometry( 2, 32, 32 ); //0.001 就会不显示了
+            var bulbMat = new THREE.MeshBasicMaterial({
+                color: colors[i]
+            });
+            pointLight.position.set( x, y, z);
+            pointLight.add(new THREE.Mesh( bulbGeometry, bulbMat));
+            group.add( pointLight );
+        }
+
+        function getFarPoint(mesh){
+            var max = 0;
+            var maxVertex;
+            var vertex = mesh.vertices;
+            for(var i = 0; i< vertex.length; i++){
+                var x = vertex[i].x;
+                var y = vertex[i].y;
+                var z = vertex[i].z;
+                var far = x*x + y*y + z*z;
+                if(max < far){
+                    max = far;
+                    maxVertex = vertex[i];
+                }
+            }
+            return maxVertex;
+        }
+
+        function cameraInit(){
+            camera = new THREE.PerspectiveCamera( 50, SCREEN_WIDTH/SCREEN_HEIGHT, 1, 10000 );
+            camera.position.z = 300;
+            scene.add( camera );
+        }
+       
+        function renderInit(){
+            renderer = new THREE.WebGLRenderer( { antialias: true } );
+            renderer.setSize( SCREEN_WIDTH, SCREEN_HEIGHT );
+            renderer.render( scene, camera );
+            renderer.setClearColor(0xe6bdbd);
+            renderer.clear();
+            container.appendChild( renderer.domElement );
+        }
+        
+        function animate() {
+            requestAnimationFrame( animate );
+            render();
+        }
+        
+        function render(){
+            group.rotation.y = group.rotation.y + 0.02;
+            renderer.render( scene, camera );
+        }
+
+    </script>
+</html>
