@@ -13,7 +13,7 @@
             }
 			a {
 				color: #08f;
-			}
+			}      
 			b {
 				color: lightgreen;
 			}
@@ -65,15 +65,34 @@
         }
       
         function initGeometry(){
-            var geometry = new THREE.BoxGeometry( 100, 100, 100 );
-            var material = new THREE.MeshBasicMaterial( {color: 0x5555b1} );
-            console.log(geometry);
+            var geometry = new THREE.BoxBufferGeometry( 100, 100, 100 );
+            var material = new THREE.MeshBasicMaterial( {color: 0x00ff00} );
 
-            var cube = new THREE.Mesh( geometry, material );
-            cube.position.z = -200;
-            cube.rotation.x = 10;
-            cube.rotation.y = 10;
-            scene.add( cube );
+            var cubeA = new THREE.Mesh( geometry, material );
+            cubeA.position.set( 100, 100, 0 );
+
+            var cubeB = new THREE.Mesh( geometry, material );
+            cubeB.position.set( -100, -100, 0 );
+
+            var group = new THREE.Group();
+            group.add( cubeA );
+            group.add( cubeB );
+
+            console.log(group);
+
+            scene.add( group );
+
+
+
+            // var geometry = new THREE.BoxGeometry( 100, 100, 100 );
+            // var material = new THREE.MeshBasicMaterial( {color: 0x5555b1} );
+            // console.log(geometry);
+
+            // var cube = new THREE.Mesh( geometry, material );
+            // cube.position.z = -200;
+            // cube.rotation.x = 10;
+            // cube.rotation.y = 10;
+            // scene.add( cube );
         }
         
         function lightInit(){
@@ -88,7 +107,7 @@
 
         function cameraInit(){
             camera = new THREE.PerspectiveCamera( 50, SCREEN_WIDTH/SCREEN_HEIGHT, 1, 10000 );
-            camera.position.z = 300;
+            camera.position.z = 500;
             scene.add( camera );
         }
        

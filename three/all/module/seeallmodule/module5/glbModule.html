@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 	<head>
-		<title>模型</title>
+		<title>three.js webgl - instancing - dynamic</title>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
     </head>
@@ -43,30 +43,27 @@
 
 				//
 
-				var light = new THREE.DirectionalLight( 0xeffffff, 1.5 );
+				var light = new THREE.DirectionalLight( 0xefefff, 1.5 );
 				light.position.set( 1, 1, 1 ).normalize();
 				scene.add( light );
 
-				var light = new THREE.DirectionalLight( 0xffeb3b, 3 );
+				var light = new THREE.DirectionalLight( 0xffefef, 1.5 );
 				light.position.set( - 1, - 1, - 1 ).normalize();
 				scene.add( light );
 
-				var light = new THREE.DirectionalLight( 0x3f51b5, 4 );
-				light.position.set( 1, 1, 1 ).normalize();
-				scene.add( light );
-
 				var loader = new GLTFLoader();
-				loader.load( "./8be1dee63c5375284fa01dd32ecc53d6.glb", function ( gltf ) {
-					mesh = gltf.scene;
-					mesh.scale.set( 93, 93, 93);
+				loader.load( "./54d7e.glb", function ( gltf ) {
+
+					mesh = gltf.scene.children[0];
+					mesh.scale.set( 900, 900, 900);
+
 
 					var material = new THREE.MeshStandardMaterial( { color: 0x0055ff, flatShading: true } );
 
-					mesh.rotation.x = -1.43
-					mesh.rotation.y = 2.34
-					mesh.rotation.z = 0
-					mesh.position.x = 20
-					mesh.position.y = -270
+					mesh.rotation.x = 0.2
+					mesh.rotation.y = 0
+					mesh.rotation.z = 6.32
+
 					scene.add( mesh );
 
 					mixer = new THREE.AnimationMixer( mesh );
@@ -122,8 +119,8 @@
 			function render() {
 				theta += 0.1;
 
-				// camera.position.z = radius * Math.sin( THREE.MathUtils.degToRad( theta ) );
-				// camera.position.y z= radius * Math.cos( THREE.MathUtils.degToRad( theta ) );
+				camera.position.z = radius * Math.sin( THREE.MathUtils.degToRad( theta ) );
+				camera.position.y = radius * Math.cos( THREE.MathUtils.degToRad( theta ) );
 
 				camera.lookAt( camera.target );
 
