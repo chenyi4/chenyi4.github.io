@@ -60,7 +60,7 @@
         var clock = new THREE.Clock();
         var smokeParticles = [];
         
-
+        
         init();
         function init() {
             sceneInit();
@@ -99,7 +99,7 @@
             camera.position.z = 300;
             scene.add( camera );
         }
-       
+        
         function renderInit(){
             renderer = new THREE.WebGLRenderer( { antialias: true } );
             renderer.setPixelRatio( window.devicePixelRatio );

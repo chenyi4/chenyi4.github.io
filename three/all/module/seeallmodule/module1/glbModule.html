@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>three.js webgl - instancing - dynamic</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    </head>
+    <style>
+        body{
+            margin: 0;
+            padding: 0;
+            font-size: 0px;
+			overflow: hidden;
+        }
+    </style>
+	<body>
+        加载glb模型
+		<script type="module">
+
+        import * as THREE from './../../../../js/three.module.js';
+        import Stats from './../../../../js/stats.module.js';
+		import { GLTFLoader } from './../../../../js/GLTFLoader.js';	
+		var container, stats;
+			var camera, scene, renderer;
+			var mesh, mixer;
+
+			init();
+			animate();
+
+			function init() {
+
+				container = document.createElement( 'div' );
+				document.body.appendChild( container );
+
+				//
+
+				camera = new THREE.PerspectiveCamera( 50, window.innerWidth / window.innerHeight, 1, 10000 );
+				camera.position.y = 1300;
+				camera.target = new THREE.Vector3( 0, 0, 0 );
+
+				scene = new THREE.Scene();
+				scene.background = new THREE.Color( 0xf0f0f0 );
+
+				//
+
+				var light = new THREE.DirectionalLight( 0xefefff, 1.5 );
+				light.position.set( 1, 1, 1 ).normalize();
+				scene.add( light );
+
+				var light = new THREE.DirectionalLight( 0xffefef, 1.5 );
+				light.position.set( - 1, - 1, - 1 ).normalize();
+				scene.add( light );
+
+				var loader = new GLTFLoader();
+				loader.load( "./8be1dee63c5375284fa01dd32ecc53d6.glb", function ( gltf ) {
+
+					mesh = gltf.scene.children[ 0 ];
+					mesh.scale.set( 1.6, 1.6, 1.6);
+
+					var material = new THREE.MeshStandardMaterial( { color: 0x0055ff, flatShading: true } );
+
+					mesh.rotation.x = 0.2
+					mesh.rotation.y = 0
+					mesh.rotation.z = 3.98
+
+					scene.add( mesh );
+
+					mixer = new THREE.AnimationMixer( mesh );
+
+					mixer.clipAction( gltf.animations[ 0 ] ).setDuration( 1 ).play();
+
+				} );
+
+				//
+
+				renderer = new THREE.WebGLRenderer();
+				renderer.setPixelRatio( window.devicePixelRatio );
+				renderer.setSize( window.innerWidth, window.innerHeight );
+
+				renderer.outputEncoding = THREE.sRGBEncoding;
+
+				container.appendChild( renderer.domElement );
+
+				//
+
+				stats = new Stats();
+				container.appendChild( stats.dom );
+
+				//
+
+				window.addEventListener( 'resize', onWindowResize, false );
+
+			}
+
+			function onWindowResize() {
+
+				camera.aspect = window.innerWidth / window.innerHeight;
+				camera.updateProjectionMatrix();
+
+				renderer.setSize( window.innerWidth, window.innerHeight );
+
+			}
+
+			//
+
+			function animate() {
+
+				requestAnimationFrame( animate );
+
+				render();
+				stats.update();
+
+			}
+
+			var radius = 600;
+			var theta = 0;
+
+			var prevTime = Date.now();
+
+			function render() {
+				theta += 0.1;
+
+				// camera.position.x = radius * Math.sin( THREE.MathUtils.degToRad( theta ) );
+				// camera.position.y = radius * Math.cos( THREE.MathUtils.degToRad( theta ) );
+
+				camera.lookAt( camera.target );
+
+				if ( mixer ) {
+
+					var time = Date.now();
+
+					mixer.update( ( time - prevTime ) * 0.001 );
+
+					prevTime = time;
+
+				}
+
+				renderer.render( scene, camera );
+
+			}
+		</script>
+
+	</body>
+</html>
