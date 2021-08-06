@@ -14,35 +14,32 @@
         }
     </style>
 	<body>
-        加载glb模型
+        加载json模型
 		<script type="module">
 
         import * as THREE from './../../../../js/three.module.js';
         import Stats from './../../../../js/stats.module.js';
-		import { GLTFLoader } from './../../../../js/GLTFLoader.js';
-		// import { DRACOLoader } from './../../../../js/DRACOLoader.js';	
+		import { OBJLoader } from './../../../../js/OBJLoader.js';
+		import { MTLLoader } from './../../../../js/MTLLoader.js';
+		
+			var camera, scene, renderer, stats;
 
-		var container, stats;
-		var camera, scene, renderer;
-		var mesh, mesh2, mixer;
+			var mesh;
+			var amount = parseInt( window.location.search.substr( 1 ) ) || 10;
+			var count = Math.pow( amount, 3 );
+			var dummy = new THREE.Object3D();
 
 			init();
 			animate();
 
 			function init() {
 
-				container = document.createElement( 'div' );
-				document.body.appendChild( container );
-				//
-					
-				camera = new THREE.PerspectiveCamera( 50, window.innerWidth / window.innerHeight, 1, 10000 );
-				camera.position.y = 1300;
-				camera.target = new THREE.Vector3( 0, 0, 0 );
+				camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 0.1, 100 );
+				camera.position.set( amount * 0.9, amount * 0.9, amount * 0.9 );
+				camera.lookAt( 0, 0, 0 );
 
 				scene = new THREE.Scene();
-				scene.background = new THREE.Color( 0xf0f0f0 );
 
-				//
 
 				var light = new THREE.DirectionalLight( 0xefefff, 1.5 );
 				light.position.set( 1, 1, 1 ).normalize();
@@ -52,43 +49,37 @@
 				light.position.set( - 1, - 1, - 1 ).normalize();
 				scene.add( light );
 
-				var loader = new GLTFLoader();
-				loader.load( "./32c7d.glb", function ( gltf ) {
-					var mesh = gltf.scene;
-					mesh.scale.set( 130, 130, 130);
-					mesh.rotation.x = -1.25
-					mesh.rotation.y = 0.2
-					mesh.rotation.z = 0	
-					scene.add( mesh );
-					mixer = new THREE.AnimationMixer( mesh );
-					mixer.clipAction( gltf.animations[ 0 ] ).setDuration( 1 ).play();
-				});
+				const manager = new THREE.LoadingManager();
+				new MTLLoader( manager )
+					.setPath( 'src/' )
+					.load( 'scaniverse-20210504-112659.mtl', function ( materials ) {
+						materials.preload();
 
-				var geometry = new THREE.BoxBufferGeometry( 1, 1, 1 );
-			var material = new THREE.MeshBasicMaterial( {color: 0x00ff00} );
+					var objloader = new OBJLoader();	
+					objloader
+						.setMaterials( materials )
+						.load( 'src/scaniverse-20210504-112659.obj', function ( object ) {
+							object.traverse(function(child) {
+								if (child instanceof THREE.Mesh) {
+									child.position.y = -5;
+									child.scale.set( 11, 11, 11 );
+									child.rotation.y = 0.8;
+									// child.rotation.x = -0.2;
+								}
+							});
+						scene.add(object);
+					})
+				})
 
-			var cubeA = new THREE.Mesh( geometry, material );
-			cubeA.position.set( 100, 100, 0 );
-
-			var cubeB = new THREE.Mesh( geometry, material );
-			cubeB.position.set( -100, -100, 0 );
-
-			var group = new THREE.Group();
-			group.add( cubeA );
-			group.add( cubeB );
-
-				renderer = new THREE.WebGLRenderer();
+				renderer = new THREE.WebGLRenderer( { antialias: true } );
 				renderer.setPixelRatio( window.devicePixelRatio );
 				renderer.setSize( window.innerWidth, window.innerHeight );
-
-				renderer.outputEncoding = THREE.sRGBEncoding;
-
-				container.appendChild( renderer.domElement );
+				document.body.appendChild( renderer.domElement );
 
 				//
 
 				stats = new Stats();
-				container.appendChild( stats.dom );
+				document.body.appendChild( stats.dom );
 
 				//
 
@@ -112,36 +103,18 @@
 				requestAnimationFrame( animate );
 
 				render();
+
 				stats.update();
 
 			}
 
-			var radius = 600;
-			var theta = 0;
-
-			var prevTime = Date.now();
-
 			function render() {
-				theta += 0.1;
-
-				// camera.position.z = radius * Math.sin( THREE.MathUtils.degToRad( theta ) );
-				// camera.position.x = radius * Math.cos( THREE.MathUtils.degToRad( theta ) );
-
-				camera.lookAt( camera.target );
-
-				if ( mixer ) {
-
-					var time = Date.now();
-
-					mixer.update( ( time - prevTime ) * 0.001 );
-
-					prevTime = time;
-
-				}
+				
 
 				renderer.render( scene, camera );
 
 			}
+
 		</script>
 
 	</body>
